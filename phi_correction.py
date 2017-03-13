@@ -2,41 +2,51 @@ import math
 import cv2 as cv
 import numpy as np
 
-def get_correction(img): #input is the y-corrected image
-	print np.unique(img)
+def get_correction(img, max_edges=1): #input is the y-corrected image
+	print img.shape
 	height = img.shape[0]
 	width = img.shape[1]
 
-	vscanline1 = 11
-	vscanline2 = 5310
+	vscanline1 = 5
+	vscanline2 = width - 5
 
-	ivalue = img[1,vscanline1]
+	x1 = []
+	x2 = []
+	y1 = []
+	y2 = []
 
-	x1 = 0
-	x2 = 0
-	y1 = 0
-	y2 = 0
+	ivalue = img[2,vscanline1]
 
 	#scanline1
 	for x in range(2,height):
 		if img[x,vscanline1]!=ivalue:
-			x1 = vscanline1
-			y1 = x
-			break
+			x1.append(vscanline1)
+			y1.append(x)
+			i_value = img[x,vscanline1]
+			if len(x1) >= max_edges:
+				break
 
-	ivalue = img[1,vscanline1]
+	ivalue = img[2,vscanline1]
 
 	# scanline2
 	for x in range(2,height):
 		if img[x,vscanline2]!=ivalue:
-			x2 = vscanline2
-			y2 = x
-			break
+			x2.append(vscanline2)
+			y2.append(x)
+			i_value = img[x,vscanline2]
+			if len(x2) >= max_edges:
+				break
 
-	print x1,",",y1
-	print x2,",",y2
+	size = min(len(x1),len(x2))
+	tot = 0
 
-	slope = 1.0*(y2-y1)/(x2-x1)
+	for x in range(0, size):
+		slope = 1.0*(y2[x]-y1[x])/(x2[x]-x1[x])
+		tot = tot+slope
+
+	slope = tot/size
+
+	# slope = 1.0*(y2-y1)/(x2-x1)
 	print slope
 	dev = math.degrees(math.atan(slope))
 	print dev
